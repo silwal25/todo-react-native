@@ -4,7 +4,7 @@ import {Text, View, StyleSheet} from 'react-native';
 const Header = () => {
   return (
     <View style={styles.header}>
-      <Text style={styles.title}>ToDo</Text>
+      <Text style={styles.title}>My ToDo List</Text>
     </View>
   );
 };
@@ -18,6 +18,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
+    //width: 100,
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 20,

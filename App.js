@@ -1,68 +1,138 @@
-import React, {useState} from 'react';
-import {Text, View, StyleSheet, FlatList} from 'react-native';
-
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  ImageBackground,
+  Alert,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 {
   /** Importing Components */
 }
 import Header from './Components/Header';
 import SingleItem from './Components/SingleItem';
 import AddTodo from './Components/AddTodo';
+import bg from './assets/wall.jpg';
 
 const App = () => {
-  const [todos, setTodos] = useState([
-    {text: 'Buy Coffee', key: '1'},
-    {text: 'Create an app', key: '2'},
-    {text: 'Practice programming', key: '3'},
-    {text: 'play guitar', key: '4'},
-  ]);
-
+  let temp;
+  const [todos, setTodos] = useState('');
   const pressHandler = (key) => {
-    setTodos((prevTodos) => {
-      return prevTodos.filter((todo) => todo.key != key);
-    });
+    Alert.alert(
+      'Completion Confirmation',
+      'You sure you have completed this task?',
+      [
+        {
+          text: 'Oh Yeah!',
+          onPress: () => {
+            setTodos((prevTodos) => {
+              return prevTodos.filter((todo) => todo.key != key);
+            });
+          },
+        },
+        {text: 'You know me so well..'},
+      ],
+    );
   };
 
-  const submitHandler = (text) => {
-    setTodos((prevTodos) => {
-      return [{text: text, key: Math.random().toString()}, ...prevTodos];
-    });
+  const submitHandler = async (text) => {
+    if (text.length > 0) {
+      setTodos((prevTodos) => {
+        return [{text: text, key: Math.random().toString()}, ...prevTodos];
+      });
+    } else {
+      Alert.alert(
+        'Whoopsie..!',
+        'You need to enter something if you want me to put that on the list...',
+        [{text: 'Ok, I am a bit silly!'}],
+      );
+    }
   };
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        let local = await AsyncStorage.getItem('todoData');
+        if (local != null) {
+          setTodos(JSON.parse(local));
+        } else {
+          console.log(local);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    async function saveData() {
+      try {
+        const jsonValue = JSON.stringify(todos);
+        await AsyncStorage.setItem('todoData', jsonValue);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    saveData();
+  }, [todos]);
 
   return (
-    <View style={styles.main}>
-      {/**
-       * Header
-       */}
-      <Header />
-      <View style={styles.container}>
-        <AddTodo submitHandler={submitHandler} />
-        <View style={styles.content}>
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
+      }}>
+      <ImageBackground source={bg} style={styles.image}>
+        <View style={styles.main}>
           {/**
-           * List
+           * Header
            */}
-          <View style={styles.list}>
-            <FlatList
-              data={todos}
-              renderItem={({item}) => (
-                <SingleItem item={item} pressHandler={pressHandler} />
-              )}
-            />
+          <Header />
+
+          <View style={styles.container}>
+            <AddTodo submitHandler={submitHandler} />
+            <View style={styles.content}>
+              {/**
+               * List
+               */}
+              <View style={styles.list}>
+                <FlatList
+                  data={todos}
+                  renderItem={({item}) => (
+                    <SingleItem item={item} pressHandler={pressHandler} />
+                  )}
+                />
+              </View>
+            </View>
           </View>
         </View>
-      </View>
-    </View>
+      </ImageBackground>
+    </TouchableWithoutFeedback>
   );
 };
 
 const styles = StyleSheet.create({
   main: {
-    display: 'flex',
     flex: 1,
     paddingBottom: 20,
   },
   container: {
     flex: 1,
     padding: 10,
+  },
+  image: {
+    flex: 1,
+    resizeMode: 'cover',
+    justifyContent: 'center',
+  },
+  content: {
+    flex: 1,
+  },
+  list: {
+    flex: 1,
   },
 });
 export default App;

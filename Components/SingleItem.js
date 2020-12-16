@@ -17,6 +17,7 @@ const styles = StyleSheet.create({
   item: {
     padding: 16,
     marginTop: 16,
+    backgroundColor: '#fff',
     borderColor: '#bbb',
     borderWidth: 1,
     borderStyle: 'dashed',
